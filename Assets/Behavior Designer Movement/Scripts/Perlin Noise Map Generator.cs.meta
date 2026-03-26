@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 39fb2e3eac19ca24d91730fd653f578a
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - prefab_Grass: {fileID: 7114730707741863731, guid: 51b525192077bfd4d8059a144cd8dcb7, type: 3}
+  - prefab_Stone: {fileID: 7728305549904616569, guid: 8869041233cb1f146b8c102dc306b8bf, type: 3}
+  - prefab_Wall: {fileID: 609756357215491481, guid: 63f6682808135d040af7a75750e09c2e, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
