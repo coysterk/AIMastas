@@ -6,7 +6,7 @@ using UnityEngine;
 From video: youtu.be/qNZ-0-7WuS8
 thanks - delete me! :) */
 
-public class SCR_PerlinNoiseMap : MonoBehaviour
+public class PerlinNoiseMapGenerator : MonoBehaviour
 {
     Dictionary<int, GameObject> tileset;
     Dictionary<int, GameObject> tile_groups;
@@ -14,10 +14,10 @@ public class SCR_PerlinNoiseMap : MonoBehaviour
     public GameObject prefab_Stone;
     public GameObject prefab_Wall;
 
-    int map_width = 40;
-    int map_height = 20;
+    public int map_width = 40;
+    public int map_height = 20;
 
-    List<List<int>> noise_grid = new List<List<int>>();
+    public List<List<int>> noise_grid = new List<List<int>>();
     List<List<GameObject>> tile_grid = new List<List<GameObject>>();
 
     // recommend 4 to 20
@@ -126,7 +126,7 @@ public class SCR_PerlinNoiseMap : MonoBehaviour
         GameObject tile = Instantiate(tile_prefab, tile_group.transform);
 
         tile.name = string.Format("tile_x{0}_y{1}", x, y);
-        tile.transform.localPosition = new Vector3(x, 0, y);
+        tile.transform.localPosition = new Vector3(x, y, 0);
 
         tile_grid[x].Add(tile);
     }
