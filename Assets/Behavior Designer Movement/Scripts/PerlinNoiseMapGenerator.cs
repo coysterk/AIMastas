@@ -24,7 +24,7 @@ public class PerlinNoiseMapGenerator : MonoBehaviour
     float magnification = 4.0f;
 
     int x_offset = 0; // <- +>
-    int y_offset = 0; // v- +^
+    int y_offset = -5; // v- +^
 
     void Start()
     {
