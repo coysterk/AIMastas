@@ -8,6 +8,7 @@ public class CannonProjectile : MonoBehaviour
     public int explosionDamage = 50;
     public float lifetime = 3f;
     public string enemyTag = "Zombie";
+    public GameObject explosionEffect; // Explosion effect.
 
     void Start()
     {
@@ -36,12 +37,16 @@ public class CannonProjectile : MonoBehaviour
                     //}
                 }
             }
+            if (explosionEffect != null) //Spawn the explosion effect exactly where the bullet currently is.
+            {
+                Instantiate(explosionEffect, transform.position, Quaternion.identity);
+            }
 
             Destroy(gameObject); //Deletes cannon ball.
         }
     }
 
-    void OnDrawGizmosSelected() //Draws the radius of the explosion
+    void OnDrawGizmosSelected() //Draws the radius of the explosion.
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, explosionRadius);

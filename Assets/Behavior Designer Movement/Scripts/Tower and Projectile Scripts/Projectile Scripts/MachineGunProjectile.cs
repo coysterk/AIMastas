@@ -20,7 +20,7 @@ public class MachineGunProjectile : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D hitInfo)
     {
-        if (hitInfo.CompareTag(enemyTag)) //If arrow made contact with zombie
+        if (hitInfo.CompareTag(enemyTag)) //If arrow made contact with zombie.
         {
             //ZombieHealth health = hitInfo.GetComponent<ZombieHealth>();
             //if (health != null)
@@ -28,7 +28,7 @@ public class MachineGunProjectile : MonoBehaviour
             //    health.TakeDamage(damage);
             //}
 
-            Destroy(gameObject); //Deletes bullet
+            Destroy(gameObject); //Deletes bullet.
         }
     }
 }

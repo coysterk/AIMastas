@@ -5,7 +5,7 @@ public class BallistaTower : MonoBehaviour
     //Tower Stats
     public float targetRange = 8f;
     public float fireRate = 0.75f;
-    private float fireCooldown = 0f;
+    public float fireCooldown = 0f;
 
     //Setup Fields
     public string enemyTag = "Zombie"; //Target entites with tag "Zombie".
@@ -61,7 +61,7 @@ public class BallistaTower : MonoBehaviour
 
     void OnDrawGizmosSelected() //Draws the radius of detection
     {
-        Gizmos.color = Color.blue; //Made this blue to tell it apart from the cannon!
+        Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(transform.position, targetRange);
     }
 }

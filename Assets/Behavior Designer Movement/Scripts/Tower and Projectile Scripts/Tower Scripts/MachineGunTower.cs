@@ -5,16 +5,18 @@ public class MachineGunTower : MonoBehaviour
     //Tower Stats
     public float targetRange = 6f;
     public float fireRate = 5f;
-    private float fireCooldown = 0f;
+    public float fireCooldown = 0f;
 
     //Dual Barrel Setup
     public Transform firePointLeft;
     public Transform firePointRight;
-    private bool useLeftBarrel = true; //Boolean to flip between left and right barrel
+    private bool useLeftBarrel = true; //Boolean to flip between left and right barrel.
 
     //Setup Fields
     public string enemyTag = "Zombie";
     public GameObject projectilePrefab;
+    public ParticleSystem flashLeft; //Muzzle flash for left barrel.
+    public ParticleSystem flashRight; //Muzzle flash for right barrel.
 
     private Transform target;
 
@@ -31,9 +33,17 @@ public class MachineGunTower : MonoBehaviour
 
             if (fireCooldown <= 0f)
             {
-                Transform activeBarre = useLeftBarrel ? firePointLeft : firePointRight; //Pick the barrel based on the toggle
-                Instantiate(projectilePrefab, activeBarre.position, activeBarre.rotation); //Spawn the bullet at the chosen barrel
-                useLeftBarrel = !useLeftBarrel; //Flip the toggle for the next shot
+                Transform activeBarre = useLeftBarrel ? firePointLeft : firePointRight; //Pick the barrel based on the toggle.
+                Instantiate(projectilePrefab, activeBarre.position, activeBarre.rotation); //Spawn the bullet at the chosen barrel.
+                if (useLeftBarrel && flashLeft != null) //Plays left or right muzzle flash.
+                {
+                    flashLeft.Play();
+                }
+                else if (!useLeftBarrel && flashRight != null)
+                {
+                    flashRight.Play();
+                }
+                useLeftBarrel = !useLeftBarrel; //Flip the toggle for the next shot.
                 fireCooldown = 1f / fireRate;
             }
         }
@@ -63,7 +73,7 @@ public class MachineGunTower : MonoBehaviour
     }
 
 
-    void OnDrawGizmosSelected() //Draws the radius of detection
+    void OnDrawGizmosSelected() //Draws the radius of detection.
     {
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(transform.position, targetRange);

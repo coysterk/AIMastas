@@ -172,4 +172,6 @@ MonoBehaviour:
   speed: 10
   explosionRadius: 2
   explosionDamage: 50
+  lifetime: 3
   enemyTag: Zombie
+  explosionEffect: {fileID: 6377255484739364231, guid: 62b28d0fa177df34cbdddc2cf49eb6e8, type: 3}

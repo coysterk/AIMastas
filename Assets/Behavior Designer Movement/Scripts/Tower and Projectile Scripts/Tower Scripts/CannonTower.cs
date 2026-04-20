@@ -5,12 +5,13 @@ public class CannonTower : MonoBehaviour
     //Tower Stats
     public float targetRange = 5f;
     public float fireRate = 1f;
-    private float fireCooldown = 0f;
+    public float fireCooldown = 0f;
 
     //Setup Feilds
     public string enemyTag = "Zombie";
-    public GameObject projectilePrefab; //Allows to fire the cannon ball
-    public Transform firePoint; //An empty child object placed at the tip of the barrel
+    public GameObject projectilePrefab; //Allows to fire the cannon ball.
+    public Transform firePoint; //An empty child object placed at the tip of the barrel.
+    public ParticleSystem muzzleFlash; //Effect of muzzle flash.
 
     private Transform target;
 
@@ -20,14 +21,18 @@ public class CannonTower : MonoBehaviour
 
         if (target != null) //If there is a zombie.
         {
-            //Math to calculate the angle between the tower and the target
+            //Math to calculate the angle between the tower and the target.
             Vector3 direction = target.position - transform.position;
             float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
             transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle - 90f)); //Points in the direction of zombie.
 
             if (fireCooldown <= 0f)
             {
-                Instantiate(projectilePrefab, firePoint.position, firePoint.rotation); //Spawn the projectile matching the tower's current rotation
+                Instantiate(projectilePrefab, firePoint.position, firePoint.rotation); //Spawn the projectile matching the tower's current rotation.
+                if (muzzleFlash != null) // Triger muzzle flash.
+                {
+                    muzzleFlash.Play();
+                }
                 fireCooldown = 1f / fireRate;
             }
         }
@@ -58,7 +63,7 @@ public class CannonTower : MonoBehaviour
         target = nearestEnemy;
     }
 
-    void OnDrawGizmosSelected() //Draws the radius of detection
+    void OnDrawGizmosSelected() //Draws the radius of detection.
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, targetRange);
