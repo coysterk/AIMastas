@@ -3,7 +3,7 @@ using UnityEngine;
 public class CannonTower : MonoBehaviour
 {
     //Tower Stats
-    public float targetRange = 5f;
+    public float targetRange = 4f;
     public float fireRate = 1f;
     public float fireCooldown = 0f;
 
@@ -12,8 +12,15 @@ public class CannonTower : MonoBehaviour
     public GameObject projectilePrefab; //Allows to fire the cannon ball.
     public Transform firePoint; //An empty child object placed at the tip of the barrel.
     public ParticleSystem muzzleFlash; //Effect of muzzle flash.
+    public AudioClip shootSound;
+    private AudioSource audioSource;
 
     private Transform target;
+
+    void Start()
+    {
+        audioSource = GetComponent<AudioSource>(); //Grab the speaker attached to the prefab.
+    }
 
     void Update()
     {
@@ -29,10 +36,16 @@ public class CannonTower : MonoBehaviour
             if (fireCooldown <= 0f)
             {
                 Instantiate(projectilePrefab, firePoint.position, firePoint.rotation); //Spawn the projectile matching the tower's current rotation.
-                if (muzzleFlash != null) // Triger muzzle flash.
+                if (muzzleFlash != null)
                 {
-                    muzzleFlash.Play();
+                    muzzleFlash.Play(); //Triger muzzle flash.
                 }
+
+                if (shootSound != null)
+                {
+                    audioSource.PlayOneShot(shootSound); // Play sound.
+                }
+
                 fireCooldown = 1f / fireRate;
             }
         }

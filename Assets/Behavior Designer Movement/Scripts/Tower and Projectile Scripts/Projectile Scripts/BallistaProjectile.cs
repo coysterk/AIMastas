@@ -4,7 +4,7 @@ public class BallistaProjectile : MonoBehaviour
 {
     //Projectile Stats
     public float speed = 15f;
-    public int damage = 100;
+    public int damage = 35;
     public float lifetime = 3f;
     public string enemyTag = "Zombie";
 
@@ -16,18 +16,17 @@ public class BallistaProjectile : MonoBehaviour
     void Update()
     {
         transform.Translate(Vector3.up * speed * Time.deltaTime); //Keeps the projectile moving in the same direcition.
-
-        void OnTriggerEnter2D(Collider2D hitInfo)
+    }
+    void OnTriggerEnter2D(Collider2D hitInfo)
+    {
+        if (hitInfo.CompareTag(enemyTag)) //If arrow made contact with zombie
         {
-            if (hitInfo.CompareTag(enemyTag)) //If arrow made contact with zombie
+            ZombieHealth healthScript = hitInfo.GetComponent<ZombieHealth>();
+            if (healthScript != null)
             {
-                //ZombieHealth healthScript = hitInfo.GetComponent<ZombieHealth>();
-                //if (healthScript != null)
-                //{
-                //    healthScript.TakeDamage(damage);
-                //}
-                Destroy(gameObject); //Delete arrow.
+                healthScript.TakeDamage(damage, transform.position);
             }
+            Destroy(gameObject); //Delete arrow.
         }
     }
 }

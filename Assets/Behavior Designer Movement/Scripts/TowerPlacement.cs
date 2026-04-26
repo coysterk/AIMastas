@@ -7,6 +7,7 @@ public class TowerPlacement : MonoBehaviour
 {
     //References
     public PerlinNoiseMapGenerator perlinNoiseMapGenerator;
+    public CameraController cameraController;
     public GameObject prefab_Cannon;
     public GameObject prefab_Balista;
     public GameObject prefab_MachineGun;
@@ -40,6 +41,11 @@ public class TowerPlacement : MonoBehaviour
 
     void Update()
     {
+        if (cameraController != null && cameraController.isPresenting) //If the camera exists and is currently doing the intro, stop the script.
+        {
+            return;
+        }
+
         if (Keyboard.current != null) HandleTowerSelection();
 
         //Map our inputs for easier reading
@@ -150,7 +156,7 @@ public class TowerPlacement : MonoBehaviour
             int gridX = Mathf.RoundToInt(localPos.x);
             int gridY = Mathf.RoundToInt(localPos.y);
 
-            if (occupiedTiles != null && gridX >= 0 && gridX < perlinNoiseMapGenerator.map_width && gridY >= 0 && gridY < perlinNoiseMapGenerator.map_height) //If tower is in the map's bounds.
+            if (occupiedTiles != null && gridX >= 0 && gridX < perlinNoiseMapGenerator.mapWidth && gridY >= 0 && gridY < perlinNoiseMapGenerator.mapHeight) //If tower is in the map's bounds.
             {
                 occupiedTiles[gridX, gridY] = false; //Sets the tile the tower was on to avaliable.
             }
@@ -167,9 +173,9 @@ public class TowerPlacement : MonoBehaviour
         int gridX = Mathf.RoundToInt(localMousePos.x);
         int gridY = Mathf.RoundToInt(localMousePos.y);
 
-        if (gridX >= 0 && gridX < perlinNoiseMapGenerator.map_width && gridY >= 0 && gridY < perlinNoiseMapGenerator.map_height) //If tower is in the map's bounds.
+        if (gridX >= 0 && gridX < perlinNoiseMapGenerator.mapWidth && gridY >= 0 && gridY < perlinNoiseMapGenerator.mapHeight) //If tower is in the map's bounds.
         {
-            if (perlinNoiseMapGenerator.noise_grid[gridX][gridY] == 1 && occupiedTiles[gridX, gridY] == false) //If tile is grass and has no tower.
+            if (perlinNoiseMapGenerator.noiseGrid[gridX][gridY] == 1 && occupiedTiles[gridX, gridY] == false) //If tile is grass and has no tower.
             {
                 Vector3 localSpawnPos = new Vector3(gridX, gridY, 0f);
                 Vector3 worldSpawnPos = perlinNoiseMapGenerator.transform.TransformPoint(localSpawnPos);
@@ -219,16 +225,16 @@ public class TowerPlacement : MonoBehaviour
 
         if (occupiedTiles == null)
         {
-            occupiedTiles = new bool[perlinNoiseMapGenerator.map_width, perlinNoiseMapGenerator.map_height];
+            occupiedTiles = new bool[perlinNoiseMapGenerator.mapWidth, perlinNoiseMapGenerator.mapHeight];
         }
 
         Vector3 localMousePos = perlinNoiseMapGenerator.transform.InverseTransformPoint(GetMouseWorldPosition());
         int gridX = Mathf.RoundToInt(localMousePos.x);
         int gridY = Mathf.RoundToInt(localMousePos.y);
 
-        if (gridX >= 0 && gridX < perlinNoiseMapGenerator.map_width && gridY >= 0 && gridY < perlinNoiseMapGenerator.map_height) //If in the bounds of the map.
+        if (gridX >= 0 && gridX < perlinNoiseMapGenerator.mapWidth && gridY >= 0 && gridY < perlinNoiseMapGenerator.mapHeight) //If in the bounds of the map.
         {
-            if (perlinNoiseMapGenerator.noise_grid[gridX][gridY] == 1) //If the tile is grass.
+            if (perlinNoiseMapGenerator.noiseGrid[gridX][gridY] == 1) //If the tile is grass.
             {
                 if (occupiedTiles[gridX, gridY] == false) //If tile doesn't have any other tower.
                 {

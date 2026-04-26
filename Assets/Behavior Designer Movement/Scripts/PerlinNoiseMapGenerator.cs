@@ -2,132 +2,209 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-/* Danndx 2021 (youtube.com/danndx)
-From video: youtu.be/qNZ-0-7WuS8
-thanks - delete me! :) */
-
 public class PerlinNoiseMapGenerator : MonoBehaviour
 {
-    Dictionary<int, GameObject> tileset;
-    Dictionary<int, GameObject> tile_groups;
-    public GameObject prefab_Grass;
-    public GameObject prefab_Stone;
-    public GameObject prefab_Wall;
+    Dictionary<int, GameObject> tileSet;
+    Dictionary<int, GameObject> tileGroups;
 
-    public int map_width = 40;
-    public int map_height = 20;
+    public GameObject prefabGrass; //Grass tile.
+    public GameObject prefabStone; //Stone tile.
+    public GameObject prefabWall; //Wall tile.
 
-    public List<List<int>> noise_grid = new List<List<int>>();
-    List<List<GameObject>> tile_grid = new List<List<GameObject>>();
+    public int mapWidth = 40; //Width of map.
+    public int mapHeight = 20;
 
-    // recommend 4 to 20
+    public List<List<int>> noiseGrid = new List<List<int>>();
+    List<List<GameObject>> tileGrid = new List<List<GameObject>>();
+
     float magnification = 4.0f;
-
-    int x_offset = 0; // <- +>
-    int y_offset = -5; // v- +^
+    public int randomXOffset;
+    public int randomYOffset;
 
     void Start()
     {
-        CreateTileset();
+        CreateTileSet();
         CreateTileGroups();
-        GenerateMap();
+        GenerateValidMap();
     }
 
-    void CreateTileset()
+    void CreateTileSet()
     {
-        /** Collect and assign ID codes to the tile prefabs, for ease of access.
-            Best ordered to match land elevation. **/
-
-        tileset = new Dictionary<int, GameObject>();
-        tileset.Add(0, prefab_Stone);
-        tileset.Add(1, prefab_Grass);
-        tileset.Add(2, prefab_Wall);
+        tileSet = new Dictionary<int, GameObject>(); //Dictonary to hold tiles.
+        tileSet.Add(0, prefabStone);
+        tileSet.Add(1, prefabGrass);
+        tileSet.Add(2, prefabWall);
     }
 
     void CreateTileGroups()
     {
-        /** Create empty gameobjects for grouping tiles of the same type, ie
-            forest tiles **/
-
-
-        tile_groups = new Dictionary<int, GameObject>();
-        foreach (KeyValuePair<int, GameObject> prefab_pair in tileset)
+        tileGroups = new Dictionary<int, GameObject>();
+        foreach (KeyValuePair<int, GameObject> prefabPair in tileSet)
         {
-            GameObject tile_group = new GameObject(prefab_pair.Value.name);
-            tile_group.transform.parent = gameObject.transform;
-            tile_group.transform.localPosition = new Vector3(0, 0, 0);
-            tile_groups.Add(prefab_pair.Key, tile_group);
+            GameObject tileGroup = new GameObject(prefabPair.Value.name);
+            tileGroup.transform.parent = gameObject.transform;
+            tileGroup.transform.localPosition = new Vector3(0, 0, 0);
+            tileGroups.Add(prefabPair.Key, tileGroup);
         }
     }
 
-    void GenerateMap()
+    void GenerateValidMap()
     {
-        /** Generate a 2D grid using the Perlin noise fuction, storing it as
-           both raw ID values and tile gameobjects **/
+        bool isValid = false;
+        int attempts = 0; //Counter for map attempts
+        int maxAttempts = 1000;
 
-        for (int x = 0; x < map_width; x++)
+        while (!isValid && attempts < maxAttempts) //If current map not valid and below max attempts.
         {
-            noise_grid.Add(new List<int>());
-            tile_grid.Add(new List<GameObject>());
+            attempts++; //Increment attempt counter.
 
-            for (int y = 0; y < map_height; y++)
+            randomXOffset = Random.Range(-10000, 10000); //Make random x offset
+            randomYOffset = Random.Range(-10000, 10000); //Make random y offset
+
+            isValid = GenerateAndValidateNoiseData();
+        }
+
+        if (attempts >= maxAttempts)
+        {
+            Debug.LogError("Could not find a valid map after " + maxAttempts + " attempts! Your magnification might be too high or low.");
+        }
+        else
+        {
+            Debug.Log("Success! Valid map found after " + attempts + " attempts.");
+            BuildMapVisuals();
+        }
+    }
+
+    bool GenerateAndValidateNoiseData()
+    {
+        noiseGrid.Clear(); //Start a fresh grid.
+
+        for (int x = 0; x < mapWidth; x++) //Generate the math grid and do the quick Column Check.
+        {
+            noiseGrid.Add(new List<int>());
+
+            int stoneCountInColumn = 0; //Track how many stone tiles are in this specific column.
+
+            for (int y = 0; y < mapHeight; y++)
             {
-                int tile_id;
+                int tileId;
 
-                // Check if we are at the bottom (y=0) or the top (y=map_height-1)
-                if (y == 0 || y == map_height - 1)
+                if (y == 0 || y == mapHeight - 1)
                 {
-                    tile_id = 2;
+                    tileId = 2; //Walls on top and bottom.
                 }
                 else
                 {
-                    tile_id = GetIdUsingPerlin(x, y);
+                    tileId = GetIdUsingPerlin(x, y);
                 }
 
-                noise_grid[x].Add(tile_id);
-                CreateTile(tile_id, x, y);
+                noiseGrid[x].Add(tileId);
+
+                if (tileId == 0) //If it's a stone tile (0) then count it.
+                {
+                    stoneCountInColumn++;
+                }
+            }
+
+            if (stoneCountInColumn < 3) //Checks if there is enough stone tiles per row to make the map more open.
+            {
+                return false;
+            }
+        }
+
+        return CheckPathExists(); //Run the BFS algorithm to ensure the stones actually connect from left to right.
+    }
+
+    bool CheckPathExists()
+    {
+        Queue<Vector2Int> queue = new Queue<Vector2Int>();
+        bool[,] visited = new bool[mapWidth, mapHeight];
+
+        //Find all starting stone tiles on the left edge (x = 0).
+        for (int y = 1; y < mapHeight - 1; y++)
+        {
+            if (noiseGrid[0][y] == 0) //0 is Stone.
+            {
+                queue.Enqueue(new Vector2Int(0, y));
+                visited[0, y] = true;
+            }
+        }
+
+        //Perform Breadth-First Search (BFS)
+        Vector2Int[] directions = { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right };
+
+        while (queue.Count > 0)
+        {
+            Vector2Int current = queue.Dequeue();
+
+            if (current.x == mapWidth - 1) //Did we reach the right edge of the map?
+            {
+                return true; //A valid continuous path exists.
+            }
+
+            foreach (Vector2Int dir in directions) //Check all 4 neighbors.
+            {
+                int nextX = current.x + dir.x;
+                int nextY = current.y + dir.y;
+
+                //Make sure the neighbor is inside the map boundaries.
+                if (nextX >= 0 && nextX < mapWidth && nextY >= 0 && nextY < mapHeight)
+                {
+                    //If it is a stone (0) and we haven't visited it yet.
+                    if (noiseGrid[nextX][nextY] == 0 && !visited[nextX, nextY])
+                    {
+                        visited[nextX, nextY] = true;
+                        queue.Enqueue(new Vector2Int(nextX, nextY));
+                    }
+                }
+            }
+        }
+
+        return false; //If the queue empties out and we never hit the right edge, the path is blocked.
+    }
+
+    void BuildMapVisuals()
+    {
+        tileGrid.Clear();
+
+        for (int x = 0; x < mapWidth; x++)
+        {
+            tileGrid.Add(new List<GameObject>());
+            for (int y = 0; y < mapHeight; y++)
+            {
+                int tileId = noiseGrid[x][y];
+                CreateTile(tileId, x, y);
             }
         }
     }
 
     int GetIdUsingPerlin(int x, int y)
     {
-        /** Using a grid coordinate input, generate a Perlin noise value to be
-           converted into a tile ID code. Rescale the normalised Perlin value
-           to the number of tiles available. **/
-
-        float raw_perlin = Mathf.PerlinNoise(
-            (x - x_offset) / magnification,
-            (y - y_offset) / magnification
+        float rawPerlin = Mathf.PerlinNoise(
+            (x - randomXOffset) / magnification,
+            (y - randomYOffset) / magnification
         );
 
-        float clamp_perlin = Mathf.Clamp01(raw_perlin);
+        float clampPerlin = Mathf.Clamp01(rawPerlin);
+        float scaledPerlin = clampPerlin * (tileSet.Count - 1);
 
-        /* We subtract 1 from tileset.Count so that the Perlin noise 
-         only picks between Stone (0) and Grass (1), leaving Wall (2) 
-         for our manual placement. */
-        float scaled_perlin = clamp_perlin * (tileset.Count - 1);
-
-        if (scaled_perlin == (tileset.Count - 1))
+        if (scaledPerlin == (tileSet.Count - 1))
         {
-            scaled_perlin = (tileset.Count - 2);
+            scaledPerlin = (tileSet.Count - 2);
         }
 
-        return Mathf.FloorToInt(scaled_perlin);
+        return Mathf.FloorToInt(scaledPerlin);
     }
 
-    void CreateTile(int tile_id, int x, int y)
+    void CreateTile(int tileId, int x, int y)
     {
-        /** Creates a new tile using the type id code, group it with common
-           tiles, set it's position and store the gameobject. **/
-
-        GameObject tile_prefab = tileset[tile_id];
-        GameObject tile_group = tile_groups[tile_id];
-        GameObject tile = Instantiate(tile_prefab, tile_group.transform);
+        GameObject tilePrefab = tileSet[tileId];
+        GameObject tileGroup = tileGroups[tileId];
+        GameObject tile = Instantiate(tilePrefab, tileGroup.transform);
 
         tile.name = string.Format("tile_x{0}_y{1}", x, y);
         tile.transform.localPosition = new Vector3(x, y, 0);
 
-        tile_grid[x].Add(tile);
+        tileGrid[x].Add(tile);
     }
 }

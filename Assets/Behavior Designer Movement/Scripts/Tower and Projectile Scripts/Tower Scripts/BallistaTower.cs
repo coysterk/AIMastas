@@ -3,7 +3,7 @@ using UnityEngine;
 public class BallistaTower : MonoBehaviour
 {
     //Tower Stats
-    public float targetRange = 8f;
+    public float targetRange = 5f;
     public float fireRate = 0.75f;
     public float fireCooldown = 0f;
 
@@ -11,8 +11,15 @@ public class BallistaTower : MonoBehaviour
     public string enemyTag = "Zombie"; //Target entites with tag "Zombie".
     public GameObject projectilePrefab; //To select the projectile to use.
     public Transform firePoint; //Select the point from which to fire from.
+    public AudioClip shootSound;
+    private AudioSource audioSource;
 
     private Transform target;
+
+    void Start()
+    {
+        audioSource = GetComponent<AudioSource>(); //Grab the speaker attached to the prefab.
+    }
 
     void Update()
     {
@@ -28,6 +35,12 @@ public class BallistaTower : MonoBehaviour
             if (fireCooldown <= 0f) //If cooldown is 0.
             {
                 Instantiate(projectilePrefab, firePoint.position, firePoint.rotation); //Spawn the projectile matching the tower's current rotation
+
+                if (shootSound != null)
+                {
+                    audioSource.PlayOneShot(shootSound); //Play the sound.
+                }
+
                 fireCooldown = 1f / fireRate;
             }
         }

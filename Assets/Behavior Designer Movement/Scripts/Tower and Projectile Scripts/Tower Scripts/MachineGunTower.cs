@@ -3,8 +3,8 @@ using UnityEngine;
 public class MachineGunTower : MonoBehaviour
 {
     //Tower Stats
-    public float targetRange = 6f;
-    public float fireRate = 5f;
+    public float targetRange = 3f;
+    public float fireRate = 3f;
     public float fireCooldown = 0f;
 
     //Dual Barrel Setup
@@ -17,8 +17,15 @@ public class MachineGunTower : MonoBehaviour
     public GameObject projectilePrefab;
     public ParticleSystem flashLeft; //Muzzle flash for left barrel.
     public ParticleSystem flashRight; //Muzzle flash for right barrel.
+    public AudioClip shootSound;
+    private AudioSource audioSource;
 
     private Transform target;
+
+    void Start()
+    {
+        audioSource = GetComponent<AudioSource>(); //Grab the speaker attached to the prefab.
+    }
 
     void Update()
     {
@@ -43,6 +50,12 @@ public class MachineGunTower : MonoBehaviour
                 {
                     flashRight.Play();
                 }
+
+                if (shootSound != null)
+                {
+                    audioSource.PlayOneShot(shootSound); //Play sound.
+                }
+
                 useLeftBarrel = !useLeftBarrel; //Flip the toggle for the next shot.
                 fireCooldown = 1f / fireRate;
             }

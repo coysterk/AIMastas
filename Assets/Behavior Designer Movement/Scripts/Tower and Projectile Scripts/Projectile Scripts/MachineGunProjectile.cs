@@ -4,7 +4,7 @@ public class MachineGunProjectile : MonoBehaviour
 {
     //Projectile Stats
     public float speed = 20f;
-    public int damage = 10;
+    public int damage = 5;
     public float lifetime = 2f;
     public string enemyTag = "Zombie";
 
@@ -22,11 +22,11 @@ public class MachineGunProjectile : MonoBehaviour
     {
         if (hitInfo.CompareTag(enemyTag)) //If arrow made contact with zombie.
         {
-            //ZombieHealth health = hitInfo.GetComponent<ZombieHealth>();
-            //if (health != null)
-            //{
-            //    health.TakeDamage(damage);
-            //}
+            ZombieHealth health = hitInfo.GetComponent<ZombieHealth>();
+            if (health != null)
+            {
+                health.TakeDamage(damage, transform.position);
+            }
 
             Destroy(gameObject); //Deletes bullet.
         }
