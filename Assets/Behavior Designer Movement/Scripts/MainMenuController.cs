@@ -4,10 +4,26 @@ using UnityEngine.SceneManagement;
 public class MainMenuController : MonoBehaviour
 {
     public GameObject controlsPanel; //Reference to the controls menu.
-
+    public GameObject howToPlayPanel; //Reference to how to play.
     public void StartGame() //When start button is clicked.
     {
         SceneManager.LoadScene(1); //Loads the game.
+    }
+
+    public void OpenHowToPlay() //When how to play button is clicked.
+    {
+        if (howToPlayPanel != null)
+        {
+            if (howToPlayPanel != null) howToPlayPanel.SetActive(true); //Goes into the how to play overview.
+        }
+    }
+
+    public void CloseHowToPlay()
+    {
+        if (howToPlayPanel != null)
+        {
+            if (howToPlayPanel != null) howToPlayPanel.SetActive(false); //Goes back to normal title screen.
+        }
     }
 
     public void OpenControls() //When controls button is clicked.
