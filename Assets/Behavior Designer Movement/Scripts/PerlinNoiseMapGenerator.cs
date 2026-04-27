@@ -21,6 +21,14 @@ public class PerlinNoiseMapGenerator : MonoBehaviour
     public int randomXOffset;
     public int randomYOffset;
 
+    void Awake()
+    {
+        if (GameSettings.isDataLoaded) //If we came from the selection screen, grab the numbers for map width and height.
+        {
+            mapWidth = GameSettings.mapWidth;
+            mapHeight = GameSettings.mapHeight;
+        }
+    }
     void Start()
     {
         CreateTileSet();
