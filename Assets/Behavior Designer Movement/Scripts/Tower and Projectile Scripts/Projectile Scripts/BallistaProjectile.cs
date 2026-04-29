@@ -4,7 +4,7 @@ public class BallistaProjectile : MonoBehaviour
 {
     //Projectile Stats
     public float speed = 15f;
-    public int damage = 35;
+    public int damage = 15;
     public float lifetime = 3f;
     public string enemyTag = "Zombie";
 
@@ -21,10 +21,10 @@ public class BallistaProjectile : MonoBehaviour
     {
         if (hitInfo.CompareTag(enemyTag)) //If arrow made contact with zombie
         {
-            ZombieHealth healthScript = hitInfo.GetComponent<ZombieHealth>();
-            if (healthScript != null)
+            ZombieAgent z = hitInfo.GetComponent<ZombieAgent>();
+            if (z != null)
             {
-                healthScript.TakeDamage(damage, transform.position);
+                z.TakeDamage(damage, 1);
             }
             Destroy(gameObject); //Delete arrow.
         }

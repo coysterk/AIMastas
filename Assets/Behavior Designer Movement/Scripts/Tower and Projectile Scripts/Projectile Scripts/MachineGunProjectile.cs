@@ -22,10 +22,10 @@ public class MachineGunProjectile : MonoBehaviour
     {
         if (hitInfo.CompareTag(enemyTag)) //If arrow made contact with zombie.
         {
-            ZombieHealth health = hitInfo.GetComponent<ZombieHealth>();
-            if (health != null)
+            ZombieAgent z = hitInfo.GetComponent<ZombieAgent>();
+            if (z != null)
             {
-                health.TakeDamage(damage, transform.position);
+                z.TakeDamage(damage, 0);
             }
 
             Destroy(gameObject); //Deletes bullet.

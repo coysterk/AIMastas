@@ -65,8 +65,11 @@ public class PerlinNoiseMapGenerator : MonoBehaviour
         }
     }
 
-    void GenerateValidMap()
+    public void GenerateValidMap()
     {
+        ClearOldMapVisuals();
+        CreateTileSet();
+        CreateTileGroups();
         bool isValid = false;
         int attempts = 0; //Counter for map attempts
         int maxAttempts = 1000;
@@ -124,10 +127,13 @@ public class PerlinNoiseMapGenerator : MonoBehaviour
                         if (x == 0)
                         {
                             tileId = 4; //Farthest Left = Goal Stone
+                           
                         }
                         else if (x == mapWidth - 1)
                         {
                             tileId = 3; //Farthest Right = Start Stone
+                            
+                            
                         }
                     }
                 }
@@ -282,13 +288,43 @@ public class PerlinNoiseMapGenerator : MonoBehaviour
 
     void CreateTile(int tileId, int x, int y)
     {
-        GameObject tilePrefab = tileSet[tileId];
-        GameObject tileGroup = tileGroups[tileId];
-        GameObject tile = Instantiate(tilePrefab, tileGroup.transform);
+        if (tileSet == null)
+        {
+            Debug.LogError("tileSet is null (CreateTileSet not called?)");
+            return;
+        }
+        if (tileGroups == null)
+        {
+            Debug.LogError("tileGroups is null (CreateTileGroups not called?)");
+            return;
+        }
+        if (!tileSet.TryGetValue(tileId, out var tilePrefab) || tilePrefab == null)
+        {
+            Debug.LogError($"Missing prefab for tileId={tileId} at ({x},{y}). Check prefab assignments in Inspector.");
+            return;
+        }
+        if (!tileGroups.TryGetValue(tileId, out var tileGroup) || tileGroup == null)
+        {
+            Debug.LogError($"Missing tileGroup for tileId={tileId}. Recreate tile groups.");
+            return;
+        }
 
-        tile.name = string.Format("tile_x{0}_y{1}", x, y);
+        GameObject tile = Instantiate(tilePrefab, tileGroup.transform);
+        tile.name = $"tile_x{x}_y{y}";
         tile.transform.localPosition = new Vector3(x, y, 0);
 
         tileGrid[x].Add(tile);
+    }
+
+    void ClearOldMapVisuals()
+    {
+        // destroy previously spawned tiles/groups under this generator object
+        for (int i = transform.childCount - 1; i >= 0; i--)
+        {
+            Destroy(transform.GetChild(i).gameObject);
+        }
+
+        tileGrid.Clear();
+        tileGroups?.Clear();
     }
 }

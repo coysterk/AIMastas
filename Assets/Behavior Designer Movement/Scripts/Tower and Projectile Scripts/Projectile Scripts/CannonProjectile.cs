@@ -5,7 +5,7 @@ public class CannonProjectile : MonoBehaviour
     //Projectile Stats"
     public float speed = 10f;
     public float explosionRadius = 2f;
-    public int explosionDamage = 30;
+    public int explosionDamage = 20;
     public float lifetime = 3f;
     public string enemyTag = "Zombie";
     public GameObject explosionEffect; // Explosion effect.
@@ -30,10 +30,10 @@ public class CannonProjectile : MonoBehaviour
             {
                 if (collider.CompareTag(enemyTag)) //If arrow made contact with zombie
                 {
-                    ZombieHealth healthScript = collider.GetComponent<ZombieHealth>();
-                    if (healthScript != null)
+                    ZombieAgent z = hitInfo.GetComponent<ZombieAgent>();
+                    if (z != null)
                     {
-                       healthScript.TakeDamage(explosionDamage, transform.position);
+                        z.TakeDamage(explosionDamage, 2);
                     }
                 }
             }

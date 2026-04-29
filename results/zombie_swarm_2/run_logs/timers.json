@@ -1,0 +1,47 @@
+{
+    "name": "root",
+    "metadata": {
+        "timer_format_version": "0.1.0",
+        "start_time_seconds": "1777489607",
+        "python_version": "3.10.8 (tags/v3.10.8:aaaf517, Oct 11 2022, 16:50:30) [MSC v.1933 64 bit (AMD64)]",
+        "command_line_arguments": "C:\\Users\\Coy\\venv\\lib\\site-packages\\mlagents\\trainers\\learn.py .\\Assets\\config.yaml --run-id=zombie_swarm_2",
+        "mlagents_version": "1.1.0",
+        "mlagents_envs_version": "1.1.0",
+        "communication_protocol_version": "1.5.0",
+        "pytorch_version": "2.11.0+cpu",
+        "numpy_version": "1.23.5",
+        "end_time_seconds": "1777489657"
+    },
+    "total": 49.72099529998377,
+    "count": 1,
+    "self": 0.005635900015477091,
+    "children": {
+        "run_training.setup": {
+            "total": 0.070815599989146,
+            "count": 1,
+            "self": 0.070815599989146
+        },
+        "TrainerController.start_learning": {
+            "total": 49.64454379997915,
+            "count": 1,
+            "self": 0.0003239999059587717,
+            "children": {
+                "TrainerController._reset_env": {
+                    "total": 49.64420750003774,
+                    "count": 1,
+                    "self": 49.64420750003774
+                },
+                "trainer_threads": {
+                    "total": 9.00006853044033e-07,
+                    "count": 1,
+                    "self": 9.00006853044033e-07
+                },
+                "TrainerController._save_models": {
+                    "total": 1.1400028597563505e-05,
+                    "count": 1,
+                    "self": 1.1400028597563505e-05
+                }
+            }
+        }
+    }
+}
