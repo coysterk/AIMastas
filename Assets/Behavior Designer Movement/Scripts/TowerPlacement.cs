@@ -257,4 +257,11 @@ public class TowerPlacement : MonoBehaviour
             }
         }
     }
+
+    //We make this public so the Map Generator can call it.
+    public void RegisterPrePlacedTowers(int amount)
+    {
+        currentTowers += amount; //Add the spawned amount to your existing counter variable.
+        towerCounterText.text = currentTowers + " / 10"; //Update your UI Text. 
+    }
 }

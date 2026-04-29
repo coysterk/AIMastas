@@ -483,11 +483,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PerlinNoiseMapGenerator
   prefabGrass: {fileID: 7114730707741863731, guid: 51b525192077bfd4d8059a144cd8dcb7, type: 3}
   prefabStone: {fileID: 7728305549904616569, guid: 8869041233cb1f146b8c102dc306b8bf, type: 3}
+  prefabStartStone: {fileID: 7728305549904616569, guid: ec16b8e78b4b90a40a4e784f0d7c20ae, type: 3}
+  prefabGoalStone: {fileID: 7728305549904616569, guid: 74a15ee1ccef2764f884b3cbb152f72a, type: 3}
   prefabWall: {fileID: 609756357215491481, guid: 63f6682808135d040af7a75750e09c2e, type: 3}
   mapWidth: 40
   mapHeight: 20
   randomXOffset: 0
   randomYOffset: 0
+  isTrainingMode: 0
+  trainingTowerPrefabs:
+  - {fileID: 8296109722094275667, guid: b95f8c712c2e612428cc857543e7c9d5, type: 3}
+  - {fileID: 2973338843901891430, guid: 4d364dbdc686bb345b231a0e15c86224, type: 3}
+  - {fileID: 8362188958148274250, guid: 23986556cf21b6b4b88724d93eea49fb, type: 3}
+  trainingTowerCount: 10
 --- !u!4 &898289997
 Transform:
   m_ObjectHideFlags: 0

@@ -9,6 +9,8 @@ public class PerlinNoiseMapGenerator : MonoBehaviour
 
     public GameObject prefabGrass; //Grass tile.
     public GameObject prefabStone; //Stone tile.
+    public GameObject prefabStartStone; //Start tile for zombies.
+    public GameObject prefabGoalStone; //Goal tile for zombies.
     public GameObject prefabWall; //Wall tile.
 
     public int mapWidth = 40; //Width of map.
@@ -20,6 +22,11 @@ public class PerlinNoiseMapGenerator : MonoBehaviour
     float magnification = 4.0f;
     public int randomXOffset;
     public int randomYOffset;
+
+    //RL Training Mode
+    public bool isTrainingMode = false;
+    public GameObject[] trainingTowerPrefabs; //Allows to place muliple kinds of towers.
+    public int trainingTowerCount = 10;
 
     void Awake()
     {
@@ -42,6 +49,8 @@ public class PerlinNoiseMapGenerator : MonoBehaviour
         tileSet.Add(0, prefabStone);
         tileSet.Add(1, prefabGrass);
         tileSet.Add(2, prefabWall);
+        tileSet.Add(3, prefabStartStone);
+        tileSet.Add(4, prefabGoalStone);
     }
 
     void CreateTileGroups()
@@ -80,6 +89,11 @@ public class PerlinNoiseMapGenerator : MonoBehaviour
         {
             Debug.Log("Success! Valid map found after " + attempts + " attempts.");
             BuildMapVisuals();
+
+            if (isTrainingMode)
+            {
+                SpawnTrainingTowers(); //Spawn the towers for training.
+            }
         }
     }
 
@@ -104,11 +118,23 @@ public class PerlinNoiseMapGenerator : MonoBehaviour
                 else
                 {
                     tileId = GetIdUsingPerlin(x, y);
+                    //If Perlin noise rolled a stone, check if it's on an edge.
+                    if (tileId == 0)
+                    {
+                        if (x == 0)
+                        {
+                            tileId = 4; //Farthest Left = Goal Stone
+                        }
+                        else if (x == mapWidth - 1)
+                        {
+                            tileId = 3; //Farthest Right = Start Stone
+                        }
+                    }
                 }
 
                 noiseGrid[x].Add(tileId);
 
-                if (tileId == 0) //If it's a stone tile (0) then count it.
+                if (tileId == 0 || tileId == 3 || tileId == 4) //If it's a stone tile then count it.
                 {
                     stoneCountInColumn++;
                 }
@@ -131,7 +157,7 @@ public class PerlinNoiseMapGenerator : MonoBehaviour
         //Find all starting stone tiles on the left edge (x = 0).
         for (int y = 1; y < mapHeight - 1; y++)
         {
-            if (noiseGrid[0][y] == 0) //0 is Stone.
+            if (noiseGrid[0][y] == 4) //4 is the goal.
             {
                 queue.Enqueue(new Vector2Int(0, y));
                 visited[0, y] = true;
@@ -158,8 +184,9 @@ public class PerlinNoiseMapGenerator : MonoBehaviour
                 //Make sure the neighbor is inside the map boundaries.
                 if (nextX >= 0 && nextX < mapWidth && nextY >= 0 && nextY < mapHeight)
                 {
-                    //If it is a stone (0) and we haven't visited it yet.
-                    if (noiseGrid[nextX][nextY] == 0 && !visited[nextX, nextY])
+                    int neighborId = noiseGrid[nextX][nextY];
+                    //If it is a stone and we haven't visited it yet.
+                    if ((neighborId == 0 || neighborId == 3 || neighborId == 4) && !visited[nextX, nextY])
                     {
                         visited[nextX, nextY] = true;
                         queue.Enqueue(new Vector2Int(nextX, nextY));
@@ -186,6 +213,55 @@ public class PerlinNoiseMapGenerator : MonoBehaviour
         }
     }
 
+    void SpawnTrainingTowers()
+    {
+        if (trainingTowerPrefabs == null || trainingTowerPrefabs.Length == 0) //Catches if no towers are put in the tower array.
+        {
+            Debug.LogError("Training Mode is ON, but no tower prefabs are assigned in the array!");
+            return;
+        }
+
+        List<Vector2Int> availableGrass = new List<Vector2Int>(); //Gather the coordinates of every single grass tile on the map.
+
+        for (int x = 0; x < mapWidth; x++)
+        {
+            for (int y = 0; y < mapHeight; y++)
+            {
+                if (noiseGrid[x][y] == 1) //1 is the ID for Grass.
+                {
+                    availableGrass.Add(new Vector2Int(x, y));
+                }
+            }
+        }
+
+        int towersToSpawn = Mathf.Min(trainingTowerCount, availableGrass.Count); //Ensure we don't try to spawn 10 towers if there are less than 10 grass.
+
+        for (int i = 0; i < towersToSpawn; i++) //Randomly select tiles and spawn the towers.
+        {
+            //Pick a random index from our list of available grass.
+            int randomIndex = Random.Range(0, availableGrass.Count);
+            Vector2Int spawnCoord = availableGrass[randomIndex];
+
+            //Pick a random tower to place.
+            int randomTowerIndex = Random.Range(0, trainingTowerPrefabs.Length);
+            GameObject chosenTowerPrefab = trainingTowerPrefabs[randomTowerIndex];
+
+            GameObject newTower = Instantiate(chosenTowerPrefab, this.transform); //Instantiate the tower and parent it to the map immediately.
+            newTower.transform.localPosition = new Vector3(spawnCoord.x, spawnCoord.y, -1f); //Snap its local position to match the exact grid coordinates of the grass tile.
+
+            newTower.transform.parent = this.transform; //Keep your hierarchy clean by parenting it to the map
+        }
+
+        Debug.Log($"Training Mode: Spawned {towersToSpawn} random towers.");
+
+        TowerPlacement placementScript = FindObjectOfType<TowerPlacement>(); //Find the script in the scene.
+
+        if (placementScript != null)
+        {
+            placementScript.RegisterPrePlacedTowers(towersToSpawn); //Tell it exactly how many towers we just spawned.
+        }
+    }
+
     int GetIdUsingPerlin(int x, int y)
     {
         float rawPerlin = Mathf.PerlinNoise(
@@ -194,11 +270,11 @@ public class PerlinNoiseMapGenerator : MonoBehaviour
         );
 
         float clampPerlin = Mathf.Clamp01(rawPerlin);
-        float scaledPerlin = clampPerlin * (tileSet.Count - 1);
+        float scaledPerlin = clampPerlin * 2;
 
-        if (scaledPerlin == (tileSet.Count - 1))
+        if (scaledPerlin == 2)
         {
-            scaledPerlin = (tileSet.Count - 2);
+            scaledPerlin = 1;
         }
 
         return Mathf.FloorToInt(scaledPerlin);
